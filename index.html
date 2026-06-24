@@ -55,14 +55,35 @@
   .stat .n{font-size:34px;font-weight:700;}
   .stat:first-child .n{color:#ff7849;}.stat:last-child .n{color:var(--berry);}
   .stat .l{color:var(--muted);font-size:13px;font-weight:600;margin-top:2px;}
-  .week{display:flex;justify-content:space-between;gap:6px;}
-  .day{flex:1;}
-  .day .dot{width:100%;aspect-ratio:1;border-radius:14px;background:#eaf2fc;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:6px;}
-  .day .dot.done{background:linear-gradient(135deg,var(--blue),var(--berry));box-shadow:0 4px 10px rgba(138,79,255,.35);}
-  .day .dl{font-size:12px;color:var(--muted);font-weight:600;}
+  .week-label{font-size:12px;color:var(--muted);font-weight:600;margin:16px 0 6px;}
+  .week{display:flex;align-items:flex-end;gap:7px;height:110px;margin-top:2px;}
+  .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;gap:5px;}
+  .bar-val{font-size:12px;font-weight:700;color:var(--muted);min-height:14px;}
+  .bar{width:100%;border-radius:9px 9px 5px 5px;min-height:5px;transition:height .5s cubic-bezier(.3,1.4,.5,1);background:#dde9fb;}
+  .bar.has{background:linear-gradient(180deg,#6aa6ff,#2e86ff);}
+  .bar.full{background:linear-gradient(180deg,var(--berry),var(--blue));box-shadow:0 4px 10px rgba(138,79,255,.3);}
+  .bar-day{font-size:12px;color:var(--muted);font-weight:600;}
+  .bar-col.today .bar-day,.bar-col.today .bar-val{color:var(--blue);font-weight:700;}
   .goal-set{display:flex;align-items:center;gap:10px;justify-content:center;color:var(--muted);font-size:15px;font-weight:600;}
   .goal-set input{width:64px;background:#eef4ff;border:2px solid #d6e4ff;border-radius:12px;padding:8px;color:var(--dark);text-align:center;font-size:16px;font-family:inherit;font-weight:700;outline:none;}
   .goal-set input:focus{border-color:var(--blue);}
+  .status{font-weight:700;font-size:15px;margin:0 0 18px;padding:14px;border-radius:18px;box-shadow:0 8px 22px rgba(46,134,255,.12);line-height:1.4;}
+  .status.ok{background:#e7faf0;color:#1c9d5a;}
+  .status.warn{background:#fff3e3;color:#d77c12;}
+  .report{text-align:left;}
+  .report h3{font-size:16px;color:var(--blue);margin-bottom:10px;text-align:center;}
+  .rrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 2px;border-bottom:1px solid #eef3fb;}
+  .rrow:last-child{border-bottom:none;}
+  .rrow .rk{color:var(--muted);font-size:14px;font-weight:600;}
+  .rrow .rv{font-size:16px;font-weight:700;color:var(--dark);text-align:right;}
+  .remind{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:16px;color:var(--dark);font-size:15px;font-weight:700;}
+  .switch{position:relative;width:50px;height:28px;flex:none;}
+  .switch input{opacity:0;width:0;height:0;}
+  .slider{position:absolute;inset:0;background:#d6e4ff;border-radius:999px;cursor:pointer;transition:.2s;}
+  .slider:before{content:"";position:absolute;width:22px;height:22px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+  .switch input:checked+.slider{background:var(--blue);}
+  .switch input:checked+.slider:before{transform:translateX(22px);}
+  .remind-note{font-size:11px;color:var(--muted);font-weight:600;margin-top:8px;text-align:left;line-height:1.45;}
 </style>
 </head>
 <body>
@@ -82,15 +103,32 @@
       <div class="controls"><button class="minus" id="minus">－</button><button class="glass-btn" id="add">＋ Drink a glass 🥤</button></div>
     </div>
 
+    <div class="status" id="status"></div>
+
     <div class="card">
       <div class="streak">
-        <div class="stat"><div class="n" id="streak">0</div><div class="l">🔥 Day streak</div></div>
-        <div class="stat"><div class="n" id="best">0</div><div class="l">🏆 Best streak</div></div>
+        <div class="stat"><div class="n" id="streak">0</div><div class="l">🔥 Streak</div></div>
+        <div class="stat"><div class="n" id="best">0</div><div class="l">🏆 Best</div></div>
+        <div class="stat"><div class="n" id="avg">0</div><div class="l">💧 Avg/day</div></div>
       </div>
+      <div class="week-label">Last 7 days · glasses per day</div>
       <div class="week" id="week"></div>
     </div>
 
-    <div class="card"><div class="goal-set">Daily goal: <input type="number" id="goalInput" min="1" max="20"> glasses</div></div>
+    <div class="card report">
+      <h3>📊 Your hydration report</h3>
+      <div class="rrow"><span class="rk">This week (7-day total)</span><span class="rv" id="rTotal">0</span></div>
+      <div class="rrow"><span class="rk">Average per day (7 days)</span><span class="rv" id="rAvg7">0</span></div>
+      <div class="rrow"><span class="rk">Average per day (30 days)</span><span class="rv" id="rAvg30">0</span></div>
+      <div class="rrow"><span class="rk">Goal hit (last 30 days)</span><span class="rv" id="rHit">0/30</span></div>
+      <div class="rrow"><span class="rk">🏅 Best day ever</span><span class="rv" id="rBest">—</span></div>
+    </div>
+
+    <div class="card">
+      <div class="goal-set">Daily goal: <input type="number" id="goalInput" min="1" max="20"> glasses</div>
+      <div class="remind">🔔 Drink reminders <label class="switch"><input type="checkbox" id="remindToggle"><span class="slider"></span></label></div>
+      <div class="remind-note">Reminds you every 2 hours while the app is open. Full background reminders (app closed) need a server — can be added later.</div>
+    </div>
   </div>
 
   <script>
@@ -111,19 +149,76 @@
       document.getElementById('streak').textContent=st;document.getElementById('best').textContent=data.best;
       const weekEl=document.getElementById('week');weekEl.innerHTML='';
       const names=['S','M','T','W','T','F','S'];const d=new Date();d.setDate(d.getDate()-6);
-      for(let i=0;i<7;i++){const k=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();const done=(data.days[k]||0)>=data.goal;
-        const day=document.createElement('div');day.className='day';
-        day.innerHTML=`<div class="dot ${done?'done':''}">${done?'💧':''}</div><div class="dl">${names[d.getDay()]}</div>`;
-        weekEl.appendChild(day);d.setDate(d.getDate()+1);}
+      let sum=0;
+      for(let i=0;i<7;i++){
+        const k=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+        const c=data.days[k]||0;sum+=c;
+        const isToday=k===t;
+        const h=c?Math.max(Math.min(c/data.goal,1)*100,9):4;
+        const cls=c>=data.goal?'full':c>0?'has':'';
+        const col=document.createElement('div');col.className='bar-col'+(isToday?' today':'');
+        col.innerHTML=`<div class="bar-val">${c||''}</div><div class="bar ${cls}" style="height:${h}%"></div><div class="bar-day">${names[d.getDay()]}</div>`;
+        weekEl.appendChild(col);d.setDate(d.getDate()+1);
+      }
+      document.getElementById('avg').textContent=(sum/7).toFixed(1);
+      renderStatus(count);renderReport();
+    }
+    function renderStatus(count){
+      const el=document.getElementById('status');const left=data.goal-count;
+      if(count>=data.goal){el.className='status ok';el.textContent='🎉 Goal smashed! '+count+' glasses today — nicely hydrated.';}
+      else{el.className='status warn';const tail=new Date().getHours()>=18?" The day's almost over — catch up! ⏰":' Keep sipping! 🌊';el.textContent='💧 '+left+' glass'+(left>1?'es':'')+' to go today.'+tail;}
+    }
+    function fmtDate(k){const a=k.split('-').map(Number);const mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return mn[a[1]-1]+' '+a[2];}
+    function renderReport(){
+      let sum7=0,sum30=0,hit=0;const d=new Date();
+      for(let i=0;i<30;i++){const k=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();const c=data.days[k]||0;if(i<7)sum7+=c;sum30+=c;if(c>=data.goal)hit++;d.setDate(d.getDate()-1);}
+      let best=0,bestK=null;for(const k in data.days){if(data.days[k]>best){best=data.days[k];bestK=k;}}
+      document.getElementById('rTotal').textContent=sum7+' glasses';
+      document.getElementById('rAvg7').textContent=(sum7/7).toFixed(1)+' glasses';
+      document.getElementById('rAvg30').textContent=(sum30/30).toFixed(1)+' glasses';
+      document.getElementById('rHit').textContent=hit+'/30 days';
+      document.getElementById('rBest').textContent=best?best+' glasses ('+fmtDate(bestK)+')':'—';
     }
     document.getElementById('add').onclick=()=>{data.days[today()]=(data.days[today()]||0)+1;save();render();if(data.days[today()]===data.goal){document.querySelector('.ring').animate([{transform:'scale(1)'},{transform:'scale(1.1)'},{transform:'scale(1)'}],{duration:500});}};
     document.getElementById('minus').onclick=()=>{data.days[today()]=Math.max(0,(data.days[today()]||0)-1);save();render();};
     document.getElementById('goalInput').onchange=e=>{data.goal=Math.max(1,parseInt(e.target.value)||8);save();render();};
     render();
 
-    // installable PWA (only active over https / on Vercel)
+    // Drink reminders — fire while the app is open (true background needs a server)
+    let remindTimer=null;
+    function notifyDrink(){
+      const left=data.goal-(data.days[today()]||0);if(left<=0)return;
+      const body='💧 Time for a glass of water! '+left+' to go before your goal.';
+      if('serviceWorker' in navigator && navigator.serviceWorker.ready){
+        navigator.serviceWorker.ready.then(r=>r.showNotification('Water Tracker 💧',{body,icon:'icon-192.png',badge:'icon-192.png'})).catch(()=>{try{new Notification('Water Tracker 💧',{body});}catch(_){}});
+      }else if('Notification' in window){try{new Notification('Water Tracker 💧',{body});}catch(_){}}
+    }
+    function startReminders(){if(remindTimer)clearInterval(remindTimer);remindTimer=setInterval(()=>{if((data.days[today()]||0)<data.goal)notifyDrink();},2*60*60*1000);}
+    const remindToggle=document.getElementById('remindToggle');
+    if(data.remind && 'Notification' in window && Notification.permission==='granted'){remindToggle.checked=true;startReminders();}
+    remindToggle.onchange=async()=>{
+      if(remindToggle.checked){
+        if(!('Notification' in window)){alert('Your browser does not support notifications.');remindToggle.checked=false;return;}
+        const p=await Notification.requestPermission();
+        if(p==='granted'){data.remind=true;save();startReminders();notifyDrink();}
+        else{remindToggle.checked=false;data.remind=false;save();alert('Allow notifications in your browser settings to get reminders.');}
+      }else{data.remind=false;save();if(remindTimer)clearInterval(remindTimer);}
+    };
+
+    // installable PWA + auto-update (refreshes the app when a new version is deployed)
     if('serviceWorker' in navigator){
-      window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+      let refreshing=false;
+      navigator.serviceWorker.addEventListener('controllerchange',()=>{
+        if(refreshing)return;refreshing=true;location.reload();
+      });
+      window.addEventListener('load',async()=>{
+        try{
+          const reg=await navigator.serviceWorker.register('sw.js');
+          reg.update().catch(()=>{});
+          setInterval(()=>reg.update().catch(()=>{}),60000);
+          document.addEventListener('visibilitychange',()=>{if(!document.hidden)reg.update().catch(()=>{});});
+        }catch(_){}
+      });
     }
   </script>
 </body>
