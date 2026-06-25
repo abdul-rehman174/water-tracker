@@ -1,4 +1,4 @@
-const CACHE = 'water-tracker-v2';
+const CACHE = 'water-tracker-v3';
 const ASSETS = [
   './',
   './index.html',
